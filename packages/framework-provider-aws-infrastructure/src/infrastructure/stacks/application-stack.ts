@@ -11,13 +11,9 @@ import { setupPermissions } from './permissions'
 import { InfrastructurePlugin } from '@boostercloud/framework-provider-aws-infrastructure/src/infrastructure-plugin'
 
 export class ApplicationStackBuilder {
-  public constructor(
-    readonly config: BoosterConfig,
-    readonly plugins?: InfrastructurePlugin[],
-    readonly props?: StackProps
-  ) {}
+  public constructor(readonly config: BoosterConfig, readonly props?: StackProps) {}
 
-  public buildOn(app: App): void {
+  public buildOn(app: App, plugins?: InfrastructurePlugin[]): void {
     const stack = new Stack(app, this.config.resourceNames.applicationStack, this.props)
     const restAPI = this.buildRootRESTAPI(stack)
     const websocketAPI = this.buildRootWebSocketAPI(stack)
@@ -34,7 +30,7 @@ export class ApplicationStackBuilder {
     setupPermissions(graphQLStack, eventsStack, readModelTables, websocketAPI)
 
     // Load plugins
-    this.plugins?.forEach((plugin) => plugin.mountStack(this.config, stack))
+    plugins?.forEach((plugin) => plugin.mountStack(this.config, stack))
   }
 
   private buildRootRESTAPI(stack: Stack): RestApi {
