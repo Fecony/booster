@@ -8,7 +8,7 @@ import {
 import { fetchReadModel, storeReadModel, rawReadModelEventsToEnvelopes } from './library/read-model-adapter'
 import { rawGraphQLRequestToEnvelope } from './library/graphql-adapter'
 import { DynamoDB, CognitoIdentityServiceProvider } from 'aws-sdk'
-import { ProviderInfrastructure, ProviderLibrary, PluginDescriptor } from '@boostercloud/framework-types'
+import { ProviderInfrastructure, ProviderLibrary, RocketDescriptor } from '@boostercloud/framework-types'
 import { requestFailed, requestSucceeded } from './library/api-gateway-io'
 import { searchReadModel } from './library/searcher-adapter'
 import {
@@ -32,17 +32,17 @@ const userPool = new CognitoIdentityServiceProvider()
  * dependences that are deployed in the lambda functions. The infrastructure
  * package is only used during the deploy.
  */
-function loadInfrastructurePackage(): { Infrastructure: (plugins?: PluginDescriptor[]) => ProviderInfrastructure } {
+function loadInfrastructurePackage(): { Infrastructure: (rockets?: RocketDescriptor[]) => ProviderInfrastructure } {
   return require(require('../package.json').name + '-infrastructure')
 }
 
 /**
- * `AWSProvider` is a function that accepts a list of plugin names and returns an
+ * `AWSProvider` is a function that accepts a list of rocket names and returns an
  * object compatible with the `ProviderLibrary` defined in the `framework-types` package.
- * The plugin names are passed to the infrastructure package, which loads them dynamically
- * to extend the AWS functionality. Plugins are typically distributed in separate npm packages.
+ * The rocket names are passed to the infrastructure package, which loads them dynamically
+ * to extend the AWS functionality. Rockets are typically distributed in separate npm packages.
  */
-export const AWSProvider = (plugins?: PluginDescriptor[]): ProviderLibrary => {
+export const AWSProvider = (rockets?: RocketDescriptor[]): ProviderLibrary => {
   return {
     // ProviderEventsLibrary
     events: {
@@ -85,7 +85,7 @@ export const AWSProvider = (plugins?: PluginDescriptor[]): ProviderLibrary => {
       sendMessage: sendMessageToConnection,
     },
     // ProviderInfrastructureGetter
-    infrastructure: () => loadInfrastructurePackage().Infrastructure(plugins),
+    infrastructure: () => loadInfrastructurePackage().Infrastructure(rockets),
   }
 }
 
